@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 
 export default function() {
 
@@ -7,7 +7,6 @@ export default function() {
 
   const[input, setInput] = useState("")
   const[tasks, setTasks] = useState<string[]>([])
-
   const[editTask, setEditTask] = useState({
     enable: false,
     task: ''
@@ -21,7 +20,7 @@ export default function() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffect(() => {   //useEffect para salvar no storage
 
     if (firstRender.current) {
       firstRender.current = false;
@@ -32,7 +31,7 @@ export default function() {
 
   }, [tasks]);
 
-  function handleRegister() {
+  const handleRegister = useCallback(() => {  //useCallback utilizado para evitar memoriza funções, evitando que uma nova função seja criada a cada renderização.
     if(!input) {
       alert("Preencha o nome da sua tarefa!")
       return;
@@ -45,7 +44,7 @@ export default function() {
 
     setTasks( tarefas => [...tarefas, input] )
     setInput("")
-  }
+  }, [input, tasks])
 
   function handleSaveEdit() {
     const findIndexTask = tasks.findIndex(task => task === editTask.task)  //aqui ele vai achar a posicao do index
@@ -78,6 +77,10 @@ export default function() {
     })
   }
 
+  const totalTarefas = useMemo(() => {   //Utilizado para evitar perca de memória
+    return tasks.length;
+  }, [tasks])
+
   return(
     <div>
       <h1>Lista de tarefas</h1>
@@ -92,6 +95,10 @@ export default function() {
       </button>
 
       <hr/>
+
+      <strong> Voce tem {totalTarefas} tarefas!</strong>
+      <br />
+      <br />
 
       {tasks.map( (item, index) => (
         <section key={item}>
